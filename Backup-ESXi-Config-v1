@@ -56,4 +56,4 @@ Disconnect-VIServer -Server 10.x.x.x.x -Confirm:$false
 #RESTORE
 #Install ESXi and add the host to the vCenter
 #Set-VMHost -VMHost 10.x.x.x.x -State 'Maintenance'
-#Set-VMHostFirmware -VMHost 10.x.x.x.x -Restore -SourcePath \\server111\shares\backup\VMWare_ESXi\14Jul2018-0200\configBundle-10.17.10.158.tgz -Force
+#Set-VMHostFirmware -VMHost 10.x.x.x.x -Restore -SourcePath \\server111\shares\backup\VMWare_ESXi\14Jul2018-0200\configBundle-10.x.x.x.tgz -Force
