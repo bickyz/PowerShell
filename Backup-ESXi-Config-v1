@@ -1,0 +1,59 @@
+######################################################################################
+# # Backup ESXi config for all the hosts to Server111
+# Add domain\administrator to the member of local admin group on Server111
+# so that rgs administrator can access the shares & .key file.
+######################################################################################
+
+#Import-module VMware.VimAutomation.Core
+#Import-module VMware.VimAutomation.Vds
+#Import-module VMware.VimAutomation.Cloud
+#Import-module VMware.VimAutomation.PCloud
+#Import-module VMware.VimAutomation.Cis.Core
+#Import-module VMware.VimAutomation.Storage
+#Import-module VMware.VimAutomation.HorizonView
+#Import-module VMware.VimAutomation.HA
+#Import-module VMware.VimAutomation.vROps
+#Import-module VMware.VumAutomation
+#Import-module VMware.DeployAutomation
+#Import-module VMware.ImageBuilder
+#Import-module VMware.VimAutomation.License
+#Import-Module VMware.PowerCLI
+#. "C:\Program Files\VMware\VMware View\Server\extras\PowerShell\add-snapin.ps1"
+#Add-PSSnapin vmware.view.broker
+#Add-PSSnapin Vmware.Vimautomation.Core
+
+. "C:\Program Files (x86)\VMware\Infrastructure\PowerCLI\Scripts\Initialize-PowerCLIEnvironment.ps1"
+
+$dest1   = "\\server111\shares\backup\VMWare_ESXi"
+$username1 = "administrator@vsphere.local"
+$password1 = Get-Content "\\server\shares\credentials\vmware_vsphere.key" | ConvertTo-SecureString
+$mycreds1 = New-Object System.Management.Automation.PSCredential($username1, $password1)
+$mydate = Get-Date -uFormat "%d%b%Y-%H%M"
+####################################################################
+MD $dest1\$mydate
+
+
+# vSphere Infastructure
+Connect-VIServer -Server 10.x.x.x -Credential $mycreds1
+#Get-VMHost | ft -AutoSize
+Get-VMHost | Get-VMHostFirmware -BackupConfiguration -DestinationPath $dest1\$mydate
+Disconnect-VIServer -Server 10.x.x.x.x -Confirm:$false
+
+# VDI Infastructre
+Connect-VIServer -Server 10.x.x.x.x
+#Get-VMHost | ft -AutoSize
+Get-VMHost | Get-VMHostFirmware -BackupConfiguration -DestinationPath $dest1\$mydate
+Disconnect-VIServer -Server 10.x.x.x.x -Confirm:$false
+
+
+#Get-VMHost | Get-VMHostFirmware -BackupConfiguration -DestinationPath C:\test1
+
+#Get-VMHostFirmware -VMHost 10.17.10.150 -BackupConfiguration -DestinationPath C:\test1
+#Get-PowerCLIVersion
+#Get-VMHost | Select-Object Name,MaxEVCMode
+#Disconnect-VIServer -Server 10.x.x.x.x -Confirm:$false
+
+#RESTORE
+#Install ESXi and add the host to the vCenter
+#Set-VMHost -VMHost 10.x.x.x.x -State 'Maintenance'
+#Set-VMHostFirmware -VMHost 10.x.x.x.x -Restore -SourcePath \\server111\shares\backup\VMWare_ESXi\14Jul2018-0200\configBundle-10.17.10.158.tgz -Force
