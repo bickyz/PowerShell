@@ -1,0 +1,34 @@
+######################################################################################
+# # Reset delta disk for the Student & Staff Desktop Pool 
+######################################################################################
+
+. "C:\Program Files\VMware\VMware View\Server\extras\PowerShell\add-snapin.ps1"
+
+Add-PSSnapin vmware.view.broker
+#Add-PSSnapin Vmware.Vimautomation.Core
+
+Get-Pool -pool_id Student-Desktop-Pool | Get-DesktopVM | Send-LinkedCloneRefresh -schedule ((Get-Date).AddMinutes(1)) -ForceLogoff $false
+#Get-Pool -pool_id Staff-Desktop-Pool | Get-DesktopVM | Send-LinkedCloneRefresh -schedule ((Get-Date).AddMinutes(1)) -ForceLogoff $false
+#Get-Pool -pool_id Bursary-Desktop-Pool | Get-DesktopVM | Send-LinkedCloneRefresh -schedule ((Get-Date).AddMinutes(1)) -ForceLogoff $false
+#Get-Pool -pool_id Programming-Desktop-Pool | Get-DesktopVM | Send-LinkedCloneRefresh -schedule ((Get-Date).AddMinutes(1)) -ForceLogoff $false
+
+$SmtpClient = New-Object system.net.mail.smtpClient
+$SmtpClient.host = "10.x.x.x"   #Change to a SMTP server in your environment
+$MailMessage = New-Object system.net.mail.mailmessage
+$MailMessage.from = "vdi@test.co.uk"   #Change to email address you want emails to be coming from
+$MailMessage.To.add("it.staff@test.co.uk")    #Change to email address you want send to
+$MailMessage.IsBodyHtml = 1
+$MailMessage.Subject = "VDI VM has been refreshed !!!"    #Change to set your email subject
+#$MailMessage.Body = "Following Desktop Pool delta pool has been refreshed <br> Student Desktop Pool delta disk refreshed !!!"    #Change to set the body message of the email
+
+$MailMessage.Body = @"
+<span style="font-family:Verdana;">
+<h3>Delta disk for the following Desktop Pools has been refreshed:</h3>
+<h4>Student Desktop Pool</h4>
+<h4>Staff Desktop Pool</h4>
+<h4>Bursary Desktop Pool</h4>
+<h4>Programming Desktop Pool</h4>
+</span>
+"@
+
+$SmtpClient.Send($MailMessage)
