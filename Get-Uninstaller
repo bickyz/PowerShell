@@ -1,0 +1,26 @@
+function Get-Uninstaller {
+   [CmdletBinding()]
+   param(
+   [Parameter(Mandatory = $true)]
+   [ValidateNotNullOrEmpty()]
+   [string] $Name
+   )
+
+$local_key     = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*'
+$machine_key32 = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
+$machine_key64 = 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+
+$keys = @($local_key, $machine_key32, $machine_key64)
+
+Get-ItemProperty -Path $keys -ErrorAction 'SilentlyContinue' | ?{ ($_.DisplayName -like "*$Name*") -or ($_.PsChildName -like "*$Name*") } | Select-Object PsPath,DisplayVersion,DisplayName,UninstallString,InstallSource,InstallLocation,QuietUninstallString,InstallDate
+}
+## end of function
+
+# Find all the uninstallers for the named piece of software
+$uninstallers = Get-Uninstaller ADSelfService
+
+# For each uninstaller found, run msiexec /x against it
+ForEach($uninstaller in $uninstallers){
+   $MSIGuid = Split-Path -leaf $uninstaller.PSPath
+   Start-Process "Msiexec.exe" -ArgumentList "/x $MSIGuid /qn" -Wait
+}
